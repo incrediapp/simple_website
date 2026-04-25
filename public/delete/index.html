@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <title>Data deletion request — IncrediApp</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #0f1419;
+      --fg: #e7eef5;
+      --muted: #8b9aab;
+      --accent: #4f9eff;
+      --ok: #4ade80;
+      --border: rgba(231, 238, 245, 0.12);
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f6f8fb;
+        --fg: #1a2332;
+        --muted: #5c6b7d;
+        --accent: #0b6bcb;
+        --ok: #15803d;
+        --border: rgba(26, 35, 50, 0.12);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.5;
+      padding: 2rem 1.25rem 3rem;
+    }
+    main {
+      max-width: 28rem;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: clamp(1.35rem, 4vw, 1.65rem);
+      font-weight: 650;
+      letter-spacing: -0.02em;
+      margin: 0 0 0.5rem;
+    }
+    .lede {
+      color: var(--muted);
+      margin: 0 0 1.75rem;
+      font-size: 0.95rem;
+    }
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+    }
+    input[type="text"],
+    input[type="email"] {
+      width: 100%;
+      padding: 0.65rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, var(--bg) 92%, var(--fg) 8%);
+      color: var(--fg);
+      font: inherit;
+      margin-bottom: 1.1rem;
+    }
+    input:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .hp {
+      position: absolute;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+    button {
+      font: inherit;
+      font-weight: 600;
+      padding: 0.7rem 1.1rem;
+      border-radius: 8px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 0.25rem;
+    }
+    button:hover {
+      filter: brightness(1.06);
+    }
+    .note {
+      margin-top: 1.25rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .banner {
+      display: none;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.25rem;
+      font-size: 0.9rem;
+    }
+    .banner.ok {
+      display: block;
+      background: color-mix(in srgb, var(--ok) 18%, transparent);
+      color: var(--fg);
+      border: 1px solid color-mix(in srgb, var(--ok) 45%, var(--border));
+    }
+    footer {
+      margin-top: 2rem;
+      font-size: 0.85rem;
+    }
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Data deletion request</h1>
+    <p class="lede">
+      Request deletion of data associated with an app published by Incrediapp Ltd. We use this to verify store compliance; please use the email tied to your app account where possible.
+    </p>
+
+    <p id="sent-banner" class="banner ok" hidden>
+      Thanks — your request was sent. If you do not hear back within 30 days, email
+      <a href="mailto:support@incrediapp.com">support@incrediapp.com</a>.
+    </p>
+    <form id="delete-form" action="https://formsubmit.co/support@incrediapp.com" method="post">
+      <input type="hidden" name="_subject" value="Data deletion request — IncrediApp" />
+      <input type="hidden" name="_template" value="table" />
+      <input type="hidden" name="_captcha" value="false" />
+      <input type="hidden" name="_next" id="next-url" value="" />
+
+      <label for="app-name">App name</label>
+      <input
+        id="app-name"
+        name="App name"
+        type="text"
+        required
+        autocomplete="off"
+        maxlength="200"
+        placeholder="e.g. IncrediApp"
+      />
+
+      <label for="email">Your email</label>
+      <input
+        id="email"
+        name="Email"
+        type="email"
+        required
+        autocomplete="email"
+        maxlength="320"
+        placeholder="you@example.com"
+      />
+
+      <!-- Honeypot: leave empty (FormSubmit rejects if filled) -->
+      <label class="hp" for="website">Website</label>
+      <input class="hp" id="website" name="_gotcha" type="text" tabindex="-1" autocomplete="off" />
+
+      <button type="submit">Send request</button>
+    </form>
+
+    <p class="note">
+      Submissions are emailed to Incrediapp Ltd. The first time this form is used, FormSubmit may send you a one-time link to confirm the inbox — check spam if needed.
+    </p>
+
+    <footer>
+      <a href="/">Home</a>
+      &nbsp;·&nbsp;
+      <a href="/privacy/">Privacy policy</a>
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      var next = document.getElementById("next-url");
+      if (next) {
+        next.value =
+          window.location.origin +
+          window.location.pathname.replace(/\/?$/, "/") +
+          "?sent=1";
+      }
+      if (new URLSearchParams(window.location.search).get("sent") === "1") {
+        var banner = document.getElementById("sent-banner");
+        var form = document.getElementById("delete-form");
+        if (banner) {
+          banner.hidden = false;
+        }
+        if (form) {
+          form.style.display = "none";
+        }
+        var note = document.querySelector(".note");
+        if (note) {
+          note.style.display = "none";
+        }
+      }
+    })();
+  </script>
+</body>
+</html>

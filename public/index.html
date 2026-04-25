@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Google Play / Search Console: paste the verification <meta name="google-site-verification" ... /> tag here, or host the HTML file Google gives you inside public/ (same folder as this file). -->
+  <title>IncrediApp</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #0f1419;
+      --fg: #e7eef5;
+      --muted: #8b9aab;
+      --accent: #4f9eff;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f6f8fb;
+        --fg: #1a2332;
+        --muted: #5c6b7d;
+        --accent: #0b6bcb;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      display: grid;
+      place-items: center;
+      padding: 2rem;
+      line-height: 1.5;
+    }
+    main {
+      max-width: 36rem;
+      text-align: center;
+    }
+    h1 {
+      font-size: clamp(1.75rem, 4vw, 2.25rem);
+      font-weight: 650;
+      letter-spacing: -0.02em;
+      margin: 0 0 0.75rem;
+    }
+    p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>IncrediApp</h1>
+    <p>Official site for the IncrediApp Android app.</p>
+  </main>
+</body>
+</html>
