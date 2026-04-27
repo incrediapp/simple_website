@@ -1,10 +1,25 @@
 {
+  "functions": {
+    "source": "functions"
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
   "hosting": {
     "public": "public",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/api/delete-request",
+        "function": {
+          "functionId": "submitDeletionRequest",
+          "region": "us-central1"
+        }
+      }
     ],
     "headers": [
       {
@@ -13,6 +28,10 @@
           {
             "key": "X-Robots-Tag",
             "value": "noindex, nofollow, noarchive"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "no-store, max-age=0"
           }
         ]
       },
@@ -22,6 +41,10 @@
           {
             "key": "X-Robots-Tag",
             "value": "noindex, nofollow, noarchive"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "no-store, max-age=0"
           }
         ]
       }

@@ -13,6 +13,7 @@
       --muted: #8b9aab;
       --accent: #4f9eff;
       --ok: #4ade80;
+      --err: #f87171;
       --border: rgba(231, 238, 245, 0.12);
     }
     @media (prefers-color-scheme: light) {
@@ -22,8 +23,12 @@
         --muted: #5c6b7d;
         --accent: #0b6bcb;
         --ok: #15803d;
+        --err: #b91c1c;
         --border: rgba(26, 35, 50, 0.12);
       }
+    }
+    [hidden] {
+      display: none !important;
     }
     * { box-sizing: border-box; }
     body {
@@ -93,23 +98,40 @@
     button:hover {
       filter: brightness(1.06);
     }
+    button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
     .note {
       margin-top: 1.25rem;
       font-size: 0.8rem;
       color: var(--muted);
     }
-    .banner {
-      display: none;
+    #sent-banner {
       padding: 0.75rem 1rem;
       border-radius: 8px;
       margin-bottom: 1.25rem;
       font-size: 0.9rem;
-    }
-    .banner.ok {
-      display: block;
       background: color-mix(in srgb, var(--ok) 18%, transparent);
-      color: var(--fg);
       border: 1px solid color-mix(in srgb, var(--ok) 45%, var(--border));
+    }
+    /* Do not rely on the [hidden] attribute alone (ID + layout rules can override it in some cases). */
+    #sent-banner.is-collapsed {
+      display: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      height: 0 !important;
+      overflow: hidden !important;
+      visibility: hidden !important;
+    }
+    #error-banner {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.25rem;
+      font-size: 0.9rem;
+      background: color-mix(in srgb, var(--err) 15%, transparent);
+      border: 1px solid color-mix(in srgb, var(--err) 40%, var(--border));
     }
     footer {
       margin-top: 2rem;
@@ -131,20 +153,17 @@
       Request deletion of data associated with an app published by Incrediapp Ltd. We use this to verify store compliance; please use the email tied to your app account where possible.
     </p>
 
-    <p id="sent-banner" class="banner ok" hidden>
+    <div id="sent-banner" class="is-collapsed" role="status" aria-live="polite" aria-hidden="true">
       Thanks — your request was sent. If you do not hear back within 30 days, email
       <a href="mailto:support@incrediapp.com">support@incrediapp.com</a>.
-    </p>
-    <form id="delete-form" action="https://formsubmit.co/support@incrediapp.com" method="post">
-      <input type="hidden" name="_subject" value="Data deletion request — IncrediApp" />
-      <input type="hidden" name="_template" value="table" />
-      <input type="hidden" name="_captcha" value="false" />
-      <input type="hidden" name="_next" id="next-url" value="" />
+    </div>
+    <p id="error-banner" hidden></p>
 
+    <form id="delete-form">
       <label for="app-name">App name</label>
       <input
         id="app-name"
-        name="App name"
+        name="appName"
         type="text"
         required
         autocomplete="off"
@@ -155,7 +174,7 @@
       <label for="email">Your email</label>
       <input
         id="email"
-        name="Email"
+        name="email"
         type="email"
         required
         autocomplete="email"
@@ -163,15 +182,14 @@
         placeholder="you@example.com"
       />
 
-      <!-- Honeypot: leave empty (FormSubmit rejects if filled) -->
-      <label class="hp" for="website">Website</label>
-      <input class="hp" id="website" name="_gotcha" type="text" tabindex="-1" autocomplete="off" />
+      <label class="hp" for="hp-field">Company website</label>
+      <input class="hp" id="hp-field" type="text" tabindex="-1" autocomplete="off" />
 
       <button type="submit">Send request</button>
     </form>
 
     <p class="note">
-      Submissions are emailed to Incrediapp Ltd. The first time this form is used, FormSubmit may send you a one-time link to confirm the inbox — check spam if needed.
+      Submissions are sent to Incrediapp Ltd by email. For abuse protection, only one request per network address is accepted every 10 minutes.
     </p>
 
     <footer>
@@ -183,27 +201,66 @@
 
   <script>
     (function () {
-      var next = document.getElementById("next-url");
-      if (next) {
-        next.value =
-          window.location.origin +
-          window.location.pathname.replace(/\/?$/, "/") +
-          "?sent=1";
-      }
-      if (new URLSearchParams(window.location.search).get("sent") === "1") {
-        var banner = document.getElementById("sent-banner");
-        var form = document.getElementById("delete-form");
-        if (banner) {
-          banner.hidden = false;
-        }
-        if (form) {
-          form.style.display = "none";
-        }
+      var form = document.getElementById("delete-form");
+      if (!form) return;
+
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        var sent = document.getElementById("sent-banner");
+        var err = document.getElementById("error-banner");
         var note = document.querySelector(".note");
-        if (note) {
-          note.style.display = "none";
+        var btn = form.querySelector('button[type="submit"]');
+
+        err.textContent = "";
+        err.hidden = true;
+
+        btn.disabled = true;
+        try {
+          var res = await fetch("/api/delete-request", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({
+              appName: document.getElementById("app-name").value.trim(),
+              email: document.getElementById("email").value.trim(),
+              website: document.getElementById("hp-field").value,
+            }),
+          });
+
+          var data = {};
+          try {
+            data = await res.json();
+          } catch (_) {}
+
+          if (res.status === 429) {
+            err.textContent =
+              data.error || "Error submitting request. Please try again later.";
+            err.hidden = false;
+            return;
+          }
+
+          if (!res.ok) {
+            err.textContent =
+              data.error ||
+              "Something went wrong. Please try again or email support@incrediapp.com.";
+            err.hidden = false;
+            return;
+          }
+
+          sent.classList.remove("is-collapsed");
+          sent.setAttribute("aria-hidden", "false");
+          form.style.display = "none";
+          if (note) note.style.display = "none";
+        } catch (_) {
+          err.textContent =
+            "Network error. Please try again or email support@incrediapp.com.";
+          err.hidden = false;
+        } finally {
+          btn.disabled = false;
         }
-      }
+      });
     })();
   </script>
 </body>

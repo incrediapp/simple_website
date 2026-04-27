@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Lockdown: no direct reads or writes from web, iOS, or Android clients.
+    //
+    // This project only uses Firestore for server-side rate limiting on the
+    // /delete form (collection: deletionRateLimits). That data is written by
+    // the submitDeletionRequest Cloud Function via the Admin SDK, which
+    // ignores these rules.
+    //
+    // When you add a collection that clients should access, replace this
+    // block with specific match /yourCollection/{id} { ... } rules.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
